@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>大学生"电子榨菜"观看习惯与时间消耗分析 | 时间黑洞·涟漪效应</title>
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 字体与基础样式 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        /* 视觉隐喻背景装饰 */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: "⌛🌀";
+            font-size: 280px;
+            opacity: 0.08;
+            position: absolute;
+            bottom: -40px;
+            right: -40px;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        .sand-clock-meta {
+            position: relative;
+            z-index: 2;
+        }
+        .visual-metaphor {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 0.8rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .visual-metaphor span {
+            font-size: 1.8rem;
+        }
+        .stat-badge {
+            background: #f97316;
+            color: #0f172a;
+            font-weight: 700;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        .card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08);
+            padding: 1.8rem;
+            margin-bottom: 2.5rem;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            border-left: 6px solid #f97316;
+            padding-left: 1rem;
+            margin: 1.5rem 0 1.2rem 0;
+        }
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1rem 0 0.8rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+        }
+        .story-box {
+            background: #ffedd5;
+            border-left: 8px solid #f97316;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            margin: 2rem 0;
+            font-style: normal;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+        }
+        .story-box p {
+            margin-bottom: 0.5rem;
+        }
+        .quote {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .data-highlight {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #f97316;
+            display: inline-block;
+            margin-right: 8px;
+            line-height: 1;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .btn-sm {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-sm.active {
+            background: #f97316;
+            color: white;
+        }
+        .ripple-chart {
+            min-height: 460px;
+            width: 100%;
+        }
+        .footnote {
+            font-size: 0.75rem;
+            color: #475569;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            text-align: center;
+        }
+        .paradox-list {
+            background: #f1f5f9;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+        .paradox-item {
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 0.8rem;
+        }
+        .paradox-item strong {
+            color: #b91c1c;
+            font-size: 1.1rem;
+        }
+        /* 新增：图表生动描述与总结样式 */
+        .chart-story {
+            font-size: 1rem;
+            background: #fef9e8;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1.2rem;
+            margin-bottom: 1.2rem;
+            color: #3b2e1e;
+            font-weight: 500;
+            border-left: 4px solid #f97316;
+        }
+        .chart-conclusion {
+            font-size: 0.9rem;
+            background: #eef2ff;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1.2rem;
+            margin-top: 1.2rem;
+            color: #1e3a8a;
+            border-left: 4px solid #3b82f6;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .fade-up {
+            animation: fadeUp 0.7s ease forwards;
+        }
+        .section-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        .section-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        footer {
+            margin: 3rem 0 1rem;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 16px; }
+            h2 { font-size: 1.5rem; }
+            .data-highlight { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="container sand-clock-meta" style="padding: 3rem 24px 4rem 24px;">
+        <div class="visual-metaphor">
+            <span>⌛🌀</span> 流逝 · 循环
+        </div>
+        <h1 style="font-size: 3rem; font-weight: 800; letter-spacing: -0.02em;">电子榨菜：<br>被"吃掉"的时间与涟漪效应</h1>
+        <p style="font-size: 1.2rem; max-width: 680px; margin: 1rem 0 2rem 0; opacity: 0.9;">短视频、微短剧、影视解说......当用餐时刻遇上算法投喂，我们正在陷入一个无声的"时间黑洞"。</p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <div><span class="stat-badge">📱 大学生日均179.9分钟</span></div>
+            <div><span class="stat-badge">⏳ 超70% 就餐必看</span></div>
+            <div><span class="stat-badge">⚠️ 4h+ → 抑郁风险+29.3%</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 情感故事 + 黄金圈开端：Why - 现象引入 -->
+    <div class="story-box fade-up" id="emotional-story">
+        <p class="quote">🍚 "没有电子榨菜，这顿饭仿佛没了灵魂"</p>
+        <p>------ 大二学生小林，曾经每天午餐、晚餐必须打开短视频。原本15分钟吃饭，常常延长到45分钟，饭后继续"沉浸"。两个月后，他发现复习周注意力涣散，作业拖延到深夜，成绩从班级前30%跌至后40%。他说："我刷的不是视频，是被偷走的时间。"</p>
+        <p style="margin-top: 12px; font-size: 0.9rem; color: #334155;">📊 关键数据：超60%学生因刷"电子榨菜"日均挤占学习时间>1小时，<strong>专注时长从15分钟降至3分钟左右</strong>（山西大学研究，2025）。</p>
+    </div>
+
+    <!-- 第一部分：时间黑洞核心数据 (图表1+图表2) -->
+    <h2>📉 数据解剖 · 时间黑洞</h2>
+    <div class="grid-2">
+        <!-- 图表1卡片：日均时长对比 -->
+        <div class="card">
+            <div class="chart-story">🍱 "下饭"的代价：每一餐滑动的指尖，都在为时间黑洞添砖加瓦。原本只想配个饭，却不知不觉吃掉数小时。</div>
+            <h3>⏱️ 日均观看时长对比 (2025)</h3>
+            <div id="chart1" style="height: 320px;"></div>
+            <div class="chart-conclusion">📌 总结：大学生短视频日均总时长高达179.9分钟，远超全网人均156分钟；其中"电子榨菜"专属场景（就餐/通勤）就占78分钟，相当于每天多出近一集电影的时间被屏幕吞噬。微短剧专项日均更是达到101分钟，成为时间膨胀的加速器。</div>
+            <p class="footnote" style="margin-top: 0.5rem;">数据：CNNIC第52/57次报告+QuestMobile，大学生短视频总时长179.9min，电子榨菜专属78min。</p>
+        </div>
+        <!-- 图表2卡片：单次就餐观看时长分布 -->
+        <div class="card">
+            <div class="chart-story">🍽️ 你以为只刷15分钟？时间往往悄然流逝。"再刷一条"变成心理默认选项，一顿饭被拉长成一部短剧的片场。</div>
+            <h3>🍽️ 单次就餐观看时长分布</h3>
+            <div id="chart2" style="height: 320px;"></div>
+            <div class="chart-conclusion">📌 总结：超过42%的大学生没有固定时长，随吃随看，习惯性延时；31.11%的人每次观看15~45分钟，近8%超过45分钟。原本计划的"短时下饭"频繁演变为"饭后沉溺"，超60%的学生吃完饭后还会继续刷30~60分钟。</div>
+            <p class="footnote">来源：问卷星《大学生电子榨菜使用调研》2025，42.99%无固定时长，近三成超30分钟。</p>
+        </div>
+    </div>
+
+    <!-- 动态图表3: 专业&年级偏好 -->
+    <div class="card">
+        <div class="chart-story">🎓 不同的知识土壤，培育出不同的"电子口味"。文科生与理工科生的屏幕时间，相差不止一个饭点。</div>
+        <h3>🎓 不同专业群体日均观看时长差异</h3>
+        <div class="btn-group" id="discipline-toggle">
+            <button data-type="discipline" class="btn-sm active">📚 按专业</button>
+            <button data-type="grade" class="btn-sm">📖 按年级</button>
+        </div>
+        <div id="chart3" style="height: 360px;"></div>
+        <div class="chart-conclusion">📌 总结：文科/传媒/艺术生日均观看时长高达4.2小时，远超理工科的1.8小时；年级层面，大一新生（3.2小时）最长，随着年级升高逐渐下降，大四降至2.2小时。专业与年龄双重分化揭示了"电子榨菜"消费与学科文化、压力应对方式的深层关联。</div>
+        <p class="footnote">数据：问卷星+知网研究，文科生日均4.2h，理工1.8h；大一大二偏好娱乐，大三大四转向求职干货。</p>
+    </div>
+
+    <!-- 图表4: 平台使用分布 & 图表5: 抑郁风险关联 -->
+    <div class="grid-2">
+        <!-- 图表4卡片 -->
+        <div class="card">
+            <div class="chart-story">📱 谁的餐桌被谁占领？从短视频帝国到中长视频乐园，各大平台争抢大学生"低头三分钟"的黄金窗口。</div>
+            <h3>📱 主要"电子榨菜"平台渗透率</h3>
+            <div id="chart4" style="height: 300px;"></div>
+            <div class="chart-conclusion">📌 总结：抖音、快手以86.5%的大学生覆盖率成为绝对主力，B站紧随其后（68.13%），长视频平台（腾讯/爱奇艺等）占45.2%。值得警惕的是微短剧专属App（红果等）渗透率已达37.5%，凭借免费、竖屏、强爽感快速崛起，成为新一代"下饭神器"。</div>
+            <p class="footnote">数据来源：中国教育网络电视台+QuestMobile，大学生覆盖率综合调研。</p>
+        </div>
+        <!-- 图表5卡片 抑郁风险 -->
+        <div class="card">
+            <div class="chart-story">🧠 情绪的下行螺旋：短平快的快乐之后，心理暗礁渐渐显露。屏幕亮度过高，心灵的亮度却在降低。</div>
+            <h3>⚠️ 日均短视频时长与抑郁风险关联</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>👥 切换群体:</span>
+                <div class="btn-group" id="depression-toggle">
+                    <button data-group="youth" class="btn-sm">🧑 青少年(中学生)</button>
+                    <button data-group="college" class="btn-sm active">🎓 大学生</button>
+                    <button data-group="adult" class="btn-sm">💼 成年职业</button>
+                </div>
+            </div>
+            <div id="chart5" style="height: 300px; margin-top: 10px;"></div>
+            <div class="chart-conclusion">📌 总结：大学生日均使用短视频超过4小时，抑郁风险比例跃升至29.3%，而控制在1小时以内抑郁风险仅7.2%，无明显负面关联。适当使用（30-60分钟）甚至略低于完全不使用者，但一旦越过阈值，心理健康断崖式恶化。这警示我们："适量"是良药，"过量"是毒药。</div>
+            <p class="footnote">数据来源：中科院心理所《心理健康蓝皮书2023-2024》，大学生超4h后抑郁风险29.3%。</p>
+        </div>
+    </div>
+
+    <!-- 涟漪效应图 (影响模型图 三级以上连锁反应) -->
+    <h2>🌊 涟漪效应 · 从习惯到风暴</h2>
+    <div class="card">
+        <div class="chart-story">💧 一颗习惯的石子投入日常的湖面，最初的波纹微小，却在层层扩散中掀起学业、心理与社交的惊涛。</div>
+        <p style="margin-bottom: 12px;">💡 核心机制："电子榨菜"高频使用产生三级连锁反应——从时间侵占到心理健康风险与社会关系弱化</p>
+        <div id="rippleGraph" class="ripple-chart" style="height: 500px;"></div>
+        <div class="chart-conclusion">📌 总结：从"高频使用电子榨菜"出发，第一级涟漪延长就餐/填满碎片时间；第二级导致学习投入显著下降、专注力碎片化（平均专注从15分钟降至3分钟）；第三级触发学业拖延、成绩下滑与时间管理失控；第四级外溢为抑郁/焦虑风险上升及现实社交回避；最终侵蚀自我效能感。三级以上的连锁反应形成闭环，越陷越深。</div>
+        <p class="footnote">因果链条：高频刷剧 → 就餐时间延长/碎片化填满 → 学习投入减少+专注力碎片化 → 学业拖延/成绩下滑 → 焦虑/抑郁风险上升 + 现实社交回避。</p>
+    </div>
+
+    <!-- 三个社会矛盾点 (矛盾叙事) -->
+    <h2>⚡ 未被广泛讨论的三个社会矛盾</h2>
+    <div class="paradox-list grid-2" style="grid-template-columns: 1fr;">
+        <div class="paradox-item">
+            <strong>🔁 矛盾一：即时情绪解压 vs 长期成就侵蚀</strong>
+            <p>73.2%学生以"放松解压"为动机，但成瘾性使用导致学习投入下降（β=-0.19），成绩下滑，最终压力不减反增。每条短视频都会为你带来"30S"不同的视听上的快感，手指滑动间大段的时间就被凌迟成面目全非的样子，大脑在碎片化信息的冲击之下慢慢被侵蚀成千疮百孔的礁石，你觉得它还盛得下多少深度内容？</p>
+        </div>
+        <div class="paradox-item">
+            <strong>🎯 矛盾二：信息茧房窄化认知 vs 人们需要广博涉猎</strong>
+            <p>搞笑/逆袭/甜宠占据主流，知识类仅16.8%。算法会不断推给你相似的内容，让你习惯被动接受懒得思考，慢慢失去批判能力，与高等教育培养"独立，全面，有深度思维的人"的目标背道而驰。</p>
+        </div>
+        <div class="paradox-item">
+            <strong>👥 矛盾三：虚拟陪伴替代真实社交 → 深陷孤独泥淖</strong>
+            <p>47%为了"缓解孤独"而刷短视频，但39.4%的人因此减少户外社交活动。越依赖电子陪伴，真实人际连接越脆弱，形成"越孤独越刷，越刷越孤独"的闭环。</p>
+        </div>
+    </div>
+
+    <!-- 叙事逻辑总结：黄金圈法则收尾 + 情感基调 警示/反思 -->
+    <div class="card" style="background: #0f172a; color: white;">
+        <h3 style="color: #f97316; border-left-color: #f97316;">🧠 反思现状，夺回大脑的控制权</h3>
+        <p style="margin-top: 10px;"><strong>我们为什么沉迷？</strong> 算法精准满足碎片化陪伴、即时爽感、逃避压力；<strong>电子榨菜在如何影响我们？</strong> 时间黑洞→学习效率滑坡→心理健康风险涟漪。</p>
+        <p style="margin-top: 12px;">🎯 是时候做出改变了！<strong style="color:#f97316;">警示 · 反思</strong> ------我们从不妖魔化技术，短视频本可以是拓宽视野的窗口、学习新知的工具，但我们必须清醒地看见：每一次无意识的滑动，都在悄悄消耗我们的专注力、思考力，甚至是对生活的掌控感。这从来不是某一个人的"自律难题"，而是一代人共同面对的成长课题。<br><br>对抗沉迷，本质上是对抗惰性、对抗即时满足的诱惑，是主动为自己的人生争取深度成长的空间；对高校而言，守护年轻人的注意力，就是守护教育的初心，守护一代人的未来。<br><br>愿我们都能跳出算法编织的信息茧房，把刷短视频的时间，用来读一本好书、学一项技能、见一群朋友，把被"电子榨菜"偷走的时间，一点点赢回来。</p>
+    </div>
+
+    <footer class="footnote">
+        📚 权威数据来源：CNNIC第52/57次报告、问卷星调研平台、CSM微短剧报告2025、中科院心理所《心理健康蓝皮书》、山西大学教育科学学院、DataEye 2025、QuestMobile、中国知网等。图表基于公开数据综合呈现，旨在学术与公共传播用途。小组成员：金佳乐 骆津妍 李雪薇 罗一鸣 指导教师：吴茜，何江 参赛单位：大连民族大学文法学院新闻系
+    </footer>
+</div>
+
+<script>
+    // 初始化所有echarts图表
+
+    // 图表1: 日均时长对比柱状图
+    const chart1 = echarts.init(document.getElementById('chart1'));
+    chart1.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        xAxis: { type: 'category', data: ['大学生短视频总时长', '全网人均短视频', '电子榨菜专属时长(大学生)', '微短剧日均(大学生)'], axisLabel: { rotate: 15, fontWeight:500 } },
+        yAxis: { type: 'value', name: '分钟/天' },
+        series: [{
+            name: '日均时长', type: 'bar', data: [179.9, 156, 78, 101],
+            itemStyle: { borderRadius: [6,6,0,0], color: '#f97316' }
+        }]
+    });
+
+    // 图表2: 单次就餐观看时长分布 (饼图)
+    const chart2 = echarts.init(document.getElementById('chart2'));
+    chart2.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'left' },
+        series: [{
+            type: 'pie', radius: '55%', data: [
+                { name: '15分钟以下', value: 17.98 },
+                { name: '15~45分钟', value: 31.11 },
+                { name: '45分钟以上', value: 7.92 },
+                { name: '随吃随看/无固定', value: 42.99 }
+            ], emphasis: { scale: true }, label: { show: true, formatter: '{b}: {d}%' }
+        }]
+    });
+
+    // 图表3 动态数据: 专业/年级
+    const disciplineData = {
+        '文科/传媒/艺术': 4.2,
+        '理工科': 1.8,
+        '经管类': 2.5,
+        '医学/法学': 2.1
+    };
+    const gradeData = {
+        '大一': 3.2,
+        '大二': 2.9,
+        '大三': 2.7,
+        '大四': 2.2
+    };
+    let chart3 = echarts.init(document.getElementById('chart3'));
+    function updateChart3(type) {
+        let xAxisData, seriesData;
+        if (type === 'discipline') {
+            xAxisData = Object.keys(disciplineData);
+            seriesData = Object.values(disciplineData);
+        } else {
+            xAxisData = Object.keys(gradeData);
+            seriesData = Object.values(gradeData);
+        }
+        chart3.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            xAxis: { type: 'category', data: xAxisData, axisLabel: { rotate: 20 } },
+            yAxis: { type: 'value', name: '日均观看时长 (小时)' },
+            series: [{
+                type: 'bar', data: seriesData, itemStyle: { color: '#3b82f6', borderRadius: [6,6,0,0] },
+                label: { show: true, position: 'top', formatter: '{c} h' }
+            }]
+        });
+    }
+    updateChart3('discipline');
+    document.querySelectorAll('#discipline-toggle .btn-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#discipline-toggle .btn-sm').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const type = this.getAttribute('data-type');
+            updateChart3(type);
+        });
+    });
+
+    // 图表4: 平台使用分布 (饼图)
+    const chart4 = echarts.init(document.getElementById('chart4'));
+    chart4.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'left', top: 'center' },
+        series: [{
+            type: 'pie', radius: ['40%','70%'], data: [
+                { name: '抖音/快手', value: 86.5 },
+                { name: 'B站', value: 68.13 },
+                { name: '腾讯/爱奇艺/芒果', value: 45.2 },
+                { name: '微短剧App(红果等)', value: 37.5 },
+                { name: '小红书/微博', value: 29.4 }
+            ], label: { show: true, formatter: '{b}: {d}%' }
+        }]
+    });
+
+    // 图表5: 短视频时长与抑郁风险关联 (动态组别: 青少年/大学生/成年职业)
+    const depressionRisk = {
+        youth: [{ time:'<1h', risk:12.1 }, { time:'1-2h', risk:18.3 }, { time:'2-4h', risk:28.7 }, { time:'>4h', risk:42.1 }],
+        college: [{ time:'<1h', risk:7.2 }, { time:'1-2h', risk:12.5 }, { time:'2-4h', risk:19.4 }, { time:'>4h', risk:29.3 }],
+        adult: [{ time:'<1h', risk:9.5 }, { time:'1-2h', risk:15.6 }, { time:'2-4h', risk:23.2 }, { time:'>4h', risk:34.3 }]
+    };
+    let chart5 = echarts.init(document.getElementById('chart5'));
+    function updateChart5(group) {
+        const data = depressionRisk[group];
+        const categories = data.map(d => d.time);
+        const risks = data.map(d => d.risk);
+        chart5.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            xAxis: { type: 'category', data: categories, name: '日均短视频时长' },
+            yAxis: { type: 'value', name: '抑郁风险比例 (%)', min: 0, max: 50 },
+            series: [{
+                type: 'line', data: risks, smooth: true, lineStyle: { color: '#dc2626', width: 3 }, symbol: 'circle', symbolSize: 8,
+                areaStyle: { opacity: 0.1, color: '#f97316' },
+                label: { show: true, position: 'top', formatter: '{c}%' }
+            }]
+        });
+    }
+    updateChart5('college');
+    document.querySelectorAll('#depression-toggle .btn-sm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#depression-toggle .btn-sm').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const group = this.getAttribute('data-group');
+            updateChart5(group);
+        });
+    });
+
+    // 涟漪效应图 (graph关系图，三级以上连锁反应)
+    const rippleChart = echarts.init(document.getElementById('rippleGraph'));
+    const nodes = [
+        { name: '高频使用"电子榨菜"', category: 0, symbolSize: 38, itemStyle: { color: '#f97316' } },
+        { name: '一级涟漪\n就餐延长/碎片化填满', category: 1, symbolSize: 32 },
+        { name: '二级涟漪\n学习投入显著下降', category: 2, symbolSize: 28 },
+        { name: '二级涟漪\n专注力碎片化(3分钟)', category: 2, symbolSize: 28 },
+        { name: '三级涟漪\n学业拖延&成绩下滑', category: 3, symbolSize: 30 },
+        { name: '三级涟漪\n时间管理能力弱化', category: 3, symbolSize: 26 },
+        { name: '四级涟漪\n抑郁/焦虑风险上升', category: 4, symbolSize: 32, itemStyle: { color: '#b91c1c' } },
+        { name: '四级涟漪\n现实社交回避', category: 4, symbolSize: 30 },
+        { name: '深层影响\n自我效能感下降', category: 5, symbolSize: 26 }
+    ];
+    const links = [
+        { source: '高频使用"电子榨菜"', target: '一级涟漪\n就餐延长/碎片化填满' },
+        { source: '一级涟漪\n就餐延长/碎片化填满', target: '二级涟漪\n学习投入显著下降' },
+        { source: '一级涟漪\n就餐延长/碎片化填满', target: '二级涟漪\n专注力碎片化(3分钟)' },
+        { source: '二级涟漪\n学习投入显著下降', target: '三级涟漪\n学业拖延&成绩下滑' },
+        { source: '二级涟漪\n专注力碎片化(3分钟)', target: '三级涟漪\n学业拖延&成绩下滑' },
+        { source: '二级涟漪\n专注力碎片化(3分钟)', target: '三级涟漪\n时间管理能力弱化' },
+        { source: '三级涟漪\n学业拖延&成绩下滑', target: '四级涟漪\n抑郁/焦虑风险上升' },
+        { source: '三级涟漪\n时间管理能力弱化', target: '四级涟漪\n抑郁/焦虑风险上升' },
+        { source: '三级涟漪\n学业拖延&成绩下滑', target: '四级涟漪\n现实社交回避' },
+        { source: '四级涟漪\n抑郁/焦虑风险上升', target: '深层影响\n自我效能感下降' },
+        { source: '四级涟漪\n现实社交回避', target: '深层影响\n自我效能感下降' },
+        { source: '高频使用"电子榨菜"', target: '四级涟漪\n抑郁/焦虑风险上升', lineStyle: { type: 'dashed', color: '#aaa' } }
+    ];
+    const categories = [
+        { name: '源头行为' }, { name: '一级影响' }, { name: '二级影响' }, { name: '三级影响' }, { name: '四级影响' }, { name: '终极后果' }
+    ];
+    rippleChart.setOption({
+        title: { show: false },
+        tooltip: { trigger: 'item', formatter: '{b}' },
+        series: [{
+            type: 'graph', layout: 'force', force: { repulsion: 400, edgeLength: 120, gravity: 0.1, friction: 0.2 },
+            roam: true, draggable: true, data: nodes, links: links, categories: categories,
+            label: { show: true, position: 'bottom', fontSize: 11, offset: [0, 8] },
+            edgeSymbol: ['none', 'arrow'], edgeSymbolSize: [0, 8], lineStyle: { color: '#94a3b8', curveness: 0.2, width: 1.8 },
+            emphasis: { focus: 'adjacency' }
+        }]
+    });
+
+    // 滚动动画显示效果
+    const sections = document.querySelectorAll('.card, .story-box, .paradox-list, h2');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('section-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    sections.forEach(el => {
+        el.classList.add('section-hidden');
+        observer.observe(el);
+    });
+    setTimeout(() => {
+        document.querySelectorAll('.section-hidden').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight-100) el.classList.add('section-visible');
+        });
+    }, 200);
+</script>
+</body>
+</html>
